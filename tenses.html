@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenses Mastery App</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        .perspective-1000 { perspective: 1000px; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .preserve-3d { transform-style: preserve-3d; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- DATA TENSES ---
+        const tensesData = [
+          { id: 1, group: "present", name: "Simple Present", explain: "Habits or general facts.", rule: "S + V1", example: "I drink coffee every morning.", keyword: "HABITS / FAKTA" },
+          { id: 2, group: "past", name: "Simple Past", explain: "Actions finished in the past.", rule: "S + V2", example: "I watched a movie last night.", keyword: "SUDAH SELESAI (LALU)" },
+          { id: 3, group: "future", name: "Simple Future", explain: "Plans actions in the future.", rule: "S + Will + V1", example: "I will buy a new car.", keyword: "RENCANA (DEPAN)" },
+          { id: 4, group: "present", name: "Present Continuous", explain: "Happening right now.", rule: "S + To Be + V-ing", example: "It is raining now.", keyword: "SEDANG TERJADI (SKRG)" },
+          { id: 5, group: "past", name: "Past Continuous", explain: "In progress in the past.", rule: "S + Was/Were + V-ing", example: "I was sleeping when you called.", keyword: "SEDANG TERJADI (DULU)" },
+          { id: 6, group: "present", name: "Present Perfect", explain: "Past action, result is important.", rule: "S + Have/Has + V3", example: "I have finished my homework.", keyword: "HASILNYA PENTING" },
+          { id: 7, group: "present", name: "Present Perfect Cont.", explain: "Started in past, still happening.", rule: "S + Have/Has + Been + V-ing", example: "I have been waiting for 2 hours.", keyword: "DULU -> SEKARANG" }
+        ];
+
+        const OpeningScript = "Good evening. I will explain 7 English Tenses...";
+
+        // --- KOMPONEN UTAMA ---
+        function TensesMastery() {
+            const [activeTab, setActiveTab] = React.useState('sim');
+            const [peekMode, setPeekMode] = React.useState({});
+            const [currentCard, setCurrentCard] = React.useState(0);
+            const [isFlipped, setIsFlipped] = React.useState(false);
+
+            React.useEffect(() => { setPeekMode({}); }, [activeTab]);
+
+            const togglePeek = (id) => setPeekMode(prev => ({...prev, [id]: !prev[id]}));
+            const hideAllPeeks = () => setPeekMode({});
+
+            const getGroupBadge = (group) => {
+                switch(group) {
+                    case 'past': return 'bg-red-100 text-red-700';
+                    case 'future': return 'bg-blue-100 text-blue-700';
+                    default: return 'bg-emerald-100 text-emerald-700';
+                }
+            };
+
+            return (
+                <div className="max-w-md mx-auto bg-white min-h-screen flex flex-col font-sans shadow-2xl overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-slate-900 text-white p-5 shadow-lg z-10">
+                        <h1 className="text-xl font-bold">Tenses Cue Card 🇬🇧</h1>
+                        <p className="text-slate-400 text-xs mt-1">Alat Bantu Hafalan Cepat</p>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="flex border-b border-gray-200 bg-white sticky top-0 z-20">
+                        <button onClick={() => setActiveTab('sim')} className={`flex-1 py-4 text-sm font-bold flex flex-col items-center gap-1 border-b-4 ${activeTab === 'sim' ? 'border-emerald-600 text-emerald-700 bg-emerald-50' : 'text-gray-400'}`}>
+                           🎤 TAMPIL
+                        </button>
+                        <button onClick={() => setActiveTab('study')} className={`flex-1 py-4 text-sm font-bold flex flex-col items-center gap-1 border-b-4 ${activeTab === 'study' ? 'border-indigo-600 text-indigo-700 bg-indigo-50' : 'text-gray-400'}`}>
+                           📖 POLA
+                        </button>
+                        <button onClick={() => setActiveTab('flashcard')} className={`flex-1 py-4 text-sm font-bold flex flex-col items-center gap-1 border-b-4 ${activeTab === 'flashcard' ? 'border-pink-600 text-pink-700 bg-pink-50' : 'text-gray-400'}`}>
+                           🧠 KARTU
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto bg-gray-50 p-4 pb-24">
+                        
+                        {/* === MODE TAMPIL === */}
+                        {activeTab === 'sim' && (
+                            <div className="space-y-6">
+                                <button onClick={hideAllPeeks} className="w-full py-3 rounded-lg bg-emerald-600 text-white font-bold text-sm shadow-md">
+                                    🙈 Tutup Semua (Reset)
+                                </button>
+
+                                <div className="mb-6 relative">
+                                    <div className="flex justify-between items-center mb-2 pl-2">
+                                        <h3 className="font-black text-gray-400 text-sm uppercase">Opening</h3>
+                                        <button onClick={() => togglePeek('opening')} className="text-xs font-bold text-indigo-500">
+                                            {peekMode['opening'] ? 'Tutup' : '👁️ Intip'}
+                                        </button>
+                                    </div>
+                                    <div onClick={() => togglePeek('opening')} className={`p-5 rounded-xl border-2 cursor-pointer ${peekMode['opening'] ? 'bg-white border-indigo-500' : 'bg-gray-100 border-dashed'}`}>
+                                        <p className={`font-medium text-lg ${peekMode['opening'] ? 'text-gray-800' : 'text-transparent blur-sm select-none'}`}>
+                                            {peekMode['opening'] ? OpeningScript : "Good evening..."}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {tensesData.map((tense) => (
+                                        <div key={tense.id} className="relative">
+                                            <div onClick={() => togglePeek(tense.id)} className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer border-2 bg-white hover:bg-gray-50`}>
+                                                <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold text-sm ${getGroupBadge(tense.group)}`}>{tense.id}</div>
+                                                <div className="flex-1">
+                                                    <h4 className="font-bold text-lg text-gray-800">{tense.name}</h4>
+                                                    <p className="text-xs text-gray-500 font-medium">{tense.keyword}</p>
+                                                </div>
+                                                <button className="text-gray-400">{peekMode[tense.id] ? '🙈' : '👁️'}</button>
+                                            </div>
+                                            
+                                            {peekMode[tense.id] && (
+                                                <div className="mx-2 mt-2 bg-white p-4 rounded-xl border-2 border-indigo-500 shadow-xl">
+                                                    <p className="font-medium text-lg mb-2">"{tense.explain}"</p>
+                                                    <p className="font-mono text-indigo-700 font-bold bg-slate-100 p-2 rounded mb-2">{tense.rule}</p>
+                                                    <p className="italic text-gray-600 border-l-4 border-yellow-400 pl-2">"{tense.example}"</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* === MODE STUDI === */}
+                        {activeTab === 'study' && (
+                            <div className="space-y-4">
+                                {tensesData.map((tense) => (
+                                    <div key={tense.id} className="p-4 rounded-xl shadow-sm bg-white border-l-4 border-indigo-500">
+                                        <h3 className="font-bold text-gray-800 text-lg">#{tense.id} {tense.name}</h3>
+                                        <div className="grid gap-2 mt-3">
+                                            <div className="bg-slate-50 p-2 rounded"><p className="font-bold">{tense.keyword}</p></div>
+                                            <div className="bg-slate-50 p-2 rounded"><p className="font-mono text-indigo-600">{tense.rule}</p></div>
+                                            <div className="italic text-gray-600">"{tense.example}"</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* === MODE FLASHCARD === */}
+                        {activeTab === 'flashcard' && (
+                            <div className="flex flex-col items-center py-4">
+                                <div onClick={() => setIsFlipped(!isFlipped)} className="w-full max-w-xs aspect-[3/4] perspective-1000 cursor-pointer group relative">
+                                    <div className={`relative w-full h-full transition-all duration-500 preserve-3d shadow-xl rounded-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                        {/* DEPAN */}
+                                        <div className="absolute w-full h-full backface-hidden bg-white border-2 border-gray-200 rounded-2xl flex flex-col items-center justify-center p-8 text-center">
+                                            <h2 className="text-2xl font-black text-gray-800 mb-6">{tensesData[currentCard].name}</h2>
+                                            <p className="text-indigo-500 text-xs font-bold mt-8 animate-pulse">TAP UNTUK LIHAT JAWABAN</p>
+                                        </div>
+                                        {/* BELAKANG */}
+                                        <div className="absolute w-full h-full backface-hidden bg-slate-800 text-white rounded-2xl flex flex-col items-center justify-center p-6 text-center rotate-y-180">
+                                            <div className="space-y-4 text-left w-full">
+                                                <div><p className="text-yellow-400 text-[10px] uppercase font-bold">Explain</p><p className="text-sm">"{tensesData[currentCard].explain}"</p></div>
+                                                <div><p className="text-yellow-400 text-[10px] uppercase font-bold">Rule</p><p className="font-mono bg-slate-900 px-2 rounded text-green-400 inline-block">{tensesData[currentCard].rule}</p></div>
+                                                <div><p className="text-yellow-400 text-[10px] uppercase font-bold">Example</p><p className="italic text-slate-300">"{tensesData[currentCard].example}"</p></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 mt-8 w-full max-w-xs">
+                                    <button onClick={() => {if(currentCard>0) {setCurrentCard(c=>c-1); setIsFlipped(false)}}} disabled={currentCard===0} className="flex-1 py-3 bg-gray-200 rounded-xl font-bold text-gray-600 disabled:opacity-50">Prev</button>
+                                    <button onClick={() => {if(currentCard<tensesData.length-1) {setCurrentCard(c=>c+1); setIsFlipped(false)}}} disabled={currentCard===tensesData.length-1} className="flex-1 py-3 bg-indigo-600 rounded-xl font-bold text-white disabled:opacity-50">Next</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TensesMastery />);
+    </script>
+</body>
+</html>
